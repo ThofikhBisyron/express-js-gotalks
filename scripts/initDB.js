@@ -4,8 +4,8 @@ const upQuery = `
 CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
   username VARCHAR(100) NULL,
+  phone_number VARCHAR(15) NOT NULL,
   email VARCHAR(100) UNIQUE NOT NULL,
-  password TEXT NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS user_otp (
   expired_at TIMESTAMP NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
 
 `;
 

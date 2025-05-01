@@ -1,8 +1,8 @@
 const pool = require('../config/db');
 
 const downQuery = `
-DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS user_otp;
+DROP TABLE IF EXISTS users;
 `;
 
 (async () => {
