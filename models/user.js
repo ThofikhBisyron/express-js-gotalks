@@ -18,14 +18,18 @@ const getUserByEmail = async (email) => {
   return result.rows[0]
 };
 const getOtpByUserId = async (userId) => {
-  const query = `SELECT FROM user_otp WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1`
+  const query = `SELECT * FROM user_otp WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1`
   const result = await pool.query(query, [userId])
   return result.rows[0] 
 }
 
+const verifyUser = async (userId) => {
+  await pool.query(`UPDATE users SET is_verified = TRUE WHERE id = $1`, [userId])
+}
 const deleteOtpByUserId = async (userId) => {
   await pool.query(`DELETE FROM user_otp WHERE user_id = $1`, [userId])
 }
 
 
-module.exports = { createUser, getUserByEmail, createOtp, getOtpByUserId, deleteOtpByUserId };
+
+module.exports = { createUser, getUserByEmail, createOtp, getOtpByUserId, deleteOtpByUserId, verifyUser };
