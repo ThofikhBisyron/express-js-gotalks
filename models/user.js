@@ -30,6 +30,11 @@ const deleteOtpByUserId = async (userId) => {
   await pool.query(`DELETE FROM user_otp WHERE user_id = $1`, [userId])
 }
 
+const updateUserNameById = async (userId, username) => {
+  const query = `UPDATE users SET username = $1 WHERE id = $2 RETURNING *`
+  const result = await pool.query(query, [username, userId])
+  return result.rows[0]
+}
 
 
-module.exports = { createUser, getUserByEmail, createOtp, getOtpByUserId, deleteOtpByUserId, verifyUser };
+module.exports = { createUser, getUserByEmail, createOtp, getOtpByUserId, deleteOtpByUserId, verifyUser, updateUserNameById };

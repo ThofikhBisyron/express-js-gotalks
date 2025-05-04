@@ -1,6 +1,6 @@
-const { createUser, getUserByEmail, createOtp, verifyUser, getOtpByUserId, deleteOtpByUserId } = require('../models/user');
+const { createUser, getUserByEmail, createOtp, verifyUser, getOtpByUserId, deleteOtpByUserId, updateUserNameById } = require('../models/user');
 const { generateToken } = require('../services/jwtService');
-const { sendOtpEmail } = require('../services/emailService')
+const { sendOtpEmail } = require('../services/emailService');
 
 const registerOrLogin = async (req, res) => {
   console.log(req.body)
@@ -35,22 +35,18 @@ const registerOrLogin = async (req, res) => {
 
 
 const verifyOtp = async (req, res) => {
-  const {email, otp} = req.body
+  const {id} = req.user
+  const {otp} = req.body
 
   try {
-    const user = await getUserByEmail(email)
-    if (!user) {
-      return res.status(404).json({message: "User not found"})
-    }
-
-    const otpRecord = await getOtpByUserId(user.id)
+    const otpRecord = await getOtpByUserId(id)
     if (!otpRecord) {
       return res.status(404).json({message: "OTP not found or already used"})
     }
 
     const isExpired = new Date() > otpRecord.expired_at
     if (isExpired) {
-      await deleteOtpByUserId(user.id)
+      await deleteOtpByUserId(id)
       return res.status(400).json({message: "OTP has expired"})
     }
 
@@ -58,8 +54,8 @@ const verifyOtp = async (req, res) => {
       return res.status(400).json({message: "Invalid OTP"})
     }
 
-    await verifyUser(user.id)
-    await deleteOtpByUserId(user.id)
+    await verifyUser(id)
+    await deleteOtpByUserId(id)
 
     res.status(200).json({message: "OTP successfully verified, account verified"})
 
@@ -69,4 +65,26 @@ const verifyOtp = async (req, res) => {
   }
 }
 
-module.exports = { registerOrLogin, verifyOtp };
+const updateUsername = async (req, res) => {
+  const {id} = req.user
+  const {username} = req.body
+
+  try {
+    if (!username) {
+      return res.status(400).json({message: "Username cannot be empty"})
+    }
+
+    const updatedUser = await updateUserNameById(id, username)
+    return res.status(200).json({
+      message: "Username updated successfully",
+      user: updatedUser,
+    })
+    
+
+  } catch (err) {
+    console.log(err)
+    return res.status(500).json({message: "An error occurred on the server"})
+  }
+
+}
+module.exports = { registerOrLogin, verifyOtp, updateUsername };

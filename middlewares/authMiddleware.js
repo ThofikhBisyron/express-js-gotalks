@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const pool = require('../config/db')
 
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization']
@@ -17,7 +18,7 @@ const requireVerifiedUser = async (req, res, next) => {
   const { id } = req.user;
   const result = await pool.query(`SELECT is_verified FROM users WHERE id = $1`, [id])
   if (!result.rows[0].is_verified) {
-    return res.status(403).json({ message: 'User belum verifikasi OTP' });
+    return res.status(403).json({ message: 'User has not verified OTP' });
   }
   next()
 };
