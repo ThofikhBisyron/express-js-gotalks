@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS users (
   phone_number VARCHAR(15) NOT NULL,
   email VARCHAR(100) UNIQUE NOT NULL,
   image VARCHAR(255),
+  image_background VARCHAR(255),
   description TEXT,
   is_verified BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -23,7 +24,9 @@ CREATE TABLE IF NOT EXISTS user_otp (
 CREATE TABLE IF NOT EXISTS groups (
   id SERIAL PRIMARY KEY,
   name VARCHAR(100),
-  image VARCHAR(255)
+  image VARCHAR(255),
+  description VARCHAR(255),
+  created_by INT REFERENCES users(id)
 );
 
 CREATE TABLE IF NOT EXISTS group_members (
