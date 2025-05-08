@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS group_members (
   id SERIAL PRIMARY KEY,
   group_id INT REFERENCES groups(id),
   user_id INT REFERENCES users(id),
+  role VARCHAR(6),
   joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP 
 );
 
