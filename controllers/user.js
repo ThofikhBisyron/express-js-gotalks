@@ -29,7 +29,7 @@ const registerOrLogin = async (req, res) => {
 
   } catch (err) {
     console.error(err.message);
-    res.status(500).json({ message: 'Terjadi kesalahan pada server' });
+    res.status(500).json({ message: 'Terjadi kesalahan pada server' })
   }
 };
 
@@ -61,7 +61,7 @@ const verifyOtp = async (req, res) => {
 
   } catch (err) {
     console.error(err.message);
-    res.status(500).json({ message: 'An error occurred on the server' });
+    res.status(500).json({ message: 'An error occurred on the server' })
   }
 }
 
