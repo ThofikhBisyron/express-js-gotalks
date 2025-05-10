@@ -26,5 +26,7 @@ const isGroupMember = async (groupId, userId) => {
     return result.rows.length > 0
 }
 
+const removeGroup = async ()
+
 
 module.exports = { createGroup, createGroupMember, isGroupAdmin, isGroupMember }
