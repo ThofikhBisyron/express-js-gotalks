@@ -28,7 +28,7 @@ const isGroupMember = async (groupId, userId) => {
     return result.rows.length > 0
 }
 
-const delteGroupById = async () => {
+const deleteGroupById = async () => {
     const group = await pool.query(`SELECT image from groups wHERE id = $1`, [groupId])
     
     if (group.rows.length[0] === 0 ) return
@@ -45,5 +45,14 @@ const delteGroupById = async () => {
     await pool.query(`DELETE fROM groups where id = $1`)
 }
 
+const removeUserFromGroup = async (groupId, userId) => {
+    await pool.query(`DELETE FROM group_members where group_id = $1 AND user_id = $1`, [groupId, userId])
+}
 
-module.exports = { createGroup, createGroupMember, isGroupAdmin, isGroupMember }
+const countGroupMember = async (groupId) => {
+    const query = `SELECT COUNT(*) FROM group_members WHERE group_id = $1`
+    const result = await pool.query(query, [groupId])
+    return parseInt(result.rows[0].count)
+}
+
+module.exports = { createGroup, createGroupMember, isGroupAdmin, isGroupMember, deleteGroupById, removeUserFromGroup, countGroupMember }

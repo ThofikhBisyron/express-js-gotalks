@@ -1,4 +1,4 @@
-const {createGroup, createGroupMember, isGroupAdmin, isGroupMember} = require("../models/group")
+const {createGroup, createGroupMember, isGroupAdmin, isGroupMember, deleteGroupById, removeUserFromGroup, countGroupMember} = require("../models/group")
 
 const addCreateGroup = async (req, res) => {
     const userId = req.user.id
@@ -68,4 +68,46 @@ const addMemberGroup = async (req, res) => {
 
 }
 
-module.exports ={addCreateGroup, addMemberGroup}
+const deleteGroup = async (req, res) => {
+    userId = req.user
+    const {groupId} = req.params
+
+    try {
+        const isAdmin = await isGroupAdmin(groupId, userId)
+        if (!isAdmin) {
+            return res.status(403).json({message: "Only Admin can delete group"})
+        }
+
+        await deleteGroupById(groupId)
+
+        return res.status(200).json({message: "Group deleted successfully"})
+
+
+    } catch(err) {
+        console.log(err)
+        return res.status(500).json({message: "An error occurred on the server"})
+    }
+}
+
+const leaveGroup = async (req, res) => {
+    const userId = req.user
+    const {groupId} = req.params
+
+    try {
+        await removeUserFromGroup(groupId, userId)
+
+        const memberCOunt = await countGroupMember(groupId)
+        if (memberCOunt === 0) {
+            await deleteGroupById(groupId)
+        }
+
+        return res.status(200).json({message: "Left group successfully"})
+
+
+    } catch(err){
+        console.log(err)
+        return res.status(500).json({message: "An error occurred on the server"})
+    }
+}
+
+module.exports ={addCreateGroup, addMemberGroup, deleteGroup, leaveGroup}
