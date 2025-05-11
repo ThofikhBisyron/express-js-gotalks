@@ -1,4 +1,6 @@
 const pool = require("../config/db")
+const fs = require("fs")
+const path = require("path")
 
 
 const createGroup = async (name, Image, description, userId) => {
@@ -26,7 +28,22 @@ const isGroupMember = async (groupId, userId) => {
     return result.rows.length > 0
 }
 
-const removeGroup = async ()
+const delteGroupById = async () => {
+    const group = await pool.query(`SELECT image from groups wHERE id = $1`, [groupId])
+    
+    if (group.rows.length[0] === 0 ) return
+
+    const imagePath = group.rows[0].Image
+
+    if (imagePath) {
+        const fullPath = path.join(__dirname, "..", imagePath)
+        if (fs.existsSync(fullPath)) {
+            fs.unlinkSync(fullPath)
+        }
+    }
+
+    await pool.query(`DELETE fROM groups where id = $1`)
+}
 
 
 module.exports = { createGroup, createGroupMember, isGroupAdmin, isGroupMember }
