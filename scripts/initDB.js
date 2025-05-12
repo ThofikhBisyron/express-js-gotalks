@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS groups (
 
 CREATE TABLE IF NOT EXISTS group_members (
   id SERIAL PRIMARY KEY,
-  group_id INT REFERENCES groups(id),
+  group_id INT REFERENCES groups(id) ON DELETE CASCADE,
   user_id INT REFERENCES users(id),
   role VARCHAR(6),
   joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP 
@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS messages (
   id SERIAL PRIMARY KEY,
   sender_id INT REFERENCES users(id),
   receiver_id INT REFERENCES users(id),
-  group_id INT REFERENCES groups(id),
+  group_id INT REFERENCES groups(id) ON DELETE CASCADE,
   content TEXT,
   is_read BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

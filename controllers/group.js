@@ -7,7 +7,7 @@ const addCreateGroup = async (req, res) => {
     if (typeof userIds === "string") {
         userIds = [userIds];
     }
-    const image = req.file ? `upload/groups/${req.file.filename}` : null
+    const image = req.file ? `uploads/groups/${req.file.filename}` : null
 
     try{
 
@@ -69,7 +69,7 @@ const addMemberGroup = async (req, res) => {
 }
 
 const deleteGroup = async (req, res) => {
-    userId = req.user
+    userId = req.user.id
     const {groupId} = req.params
 
     try {
@@ -90,7 +90,7 @@ const deleteGroup = async (req, res) => {
 }
 
 const leaveGroup = async (req, res) => {
-    const userId = req.user
+    const userId = req.user.id
     const {groupId} = req.params
 
     try {

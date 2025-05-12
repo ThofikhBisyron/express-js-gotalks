@@ -28,25 +28,26 @@ const isGroupMember = async (groupId, userId) => {
     return result.rows.length > 0
 }
 
-const deleteGroupById = async () => {
+const deleteGroupById = async (groupId) => {
     const group = await pool.query(`SELECT image from groups wHERE id = $1`, [groupId])
     
-    if (group.rows.length[0] === 0 ) return
+    if (group.rows.length === 0 ) return
 
-    const imagePath = group.rows[0].Image
+    const imagePath = group.rows[0].image
 
     if (imagePath) {
         const fullPath = path.join(__dirname, "..", imagePath)
+        console.log(fullPath)
         if (fs.existsSync(fullPath)) {
             fs.unlinkSync(fullPath)
         }
     }
 
-    await pool.query(`DELETE fROM groups where id = $1`)
+    await pool.query(`DELETE fROM groups where id = $1`, [groupId])
 }
 
 const removeUserFromGroup = async (groupId, userId) => {
-    await pool.query(`DELETE FROM group_members where group_id = $1 AND user_id = $1`, [groupId, userId])
+    await pool.query(`DELETE FROM group_members where group_id = $1 AND user_id = $2`, [groupId, userId])
 }
 
 const countGroupMember = async (groupId) => {
