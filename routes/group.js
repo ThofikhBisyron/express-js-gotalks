@@ -7,7 +7,7 @@ const uploadGroupImage = createUploader("groups")
 
 router.post("/group", authenticateToken, requireVerifiedUser, uploadGroupImage.single("image"), addCreateGroup)
 router.post("/member", authenticateToken, requireVerifiedUser, addMemberGroup)
-router.delete("/group/:groupId", authenticateToken, requireVerifiedUser, deleteGroup)
-router.delete("/group/:groupId/leave", authenticateToken, requireVerifiedUser, leaveGroup)
+router.delete("/:groupId", authenticateToken, requireVerifiedUser, deleteGroup)
+router.delete("/:groupId/leave", authenticateToken, requireVerifiedUser, leaveGroup)
 
 module.exports = router

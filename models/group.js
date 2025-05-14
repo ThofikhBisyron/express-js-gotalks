@@ -33,12 +33,12 @@ const deleteGroupById = async (groupId) => {
     
     if (group.rows.length === 0 ) return
 
-    const imagePath = group.rows[0].image
+    const imagePath = group.rows[0].image 
 
     if (imagePath) {
         const fullPath = path.join(__dirname, "..", imagePath)
         console.log(fullPath)
-        if (fs.existsSync(fullPath)) {
+        if (fs.existsSync(fullPath, )) {
             fs.unlinkSync(fullPath)
         }
     }
