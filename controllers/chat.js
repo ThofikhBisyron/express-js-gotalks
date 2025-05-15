@@ -27,11 +27,10 @@ const markAsRead = async (req, res) => {
         await markMessageAsRead(messageId, userId)
         res.status(200).json({message: "Message marked as read"})
     }
-
      catch(err) {
         console.log(err)
         res.status(500).json({message: "An error occurred on the server"})
     }
 }
 
-module.exports = {sendMessage}
+module.exports = {sendMessage, markAsRead}

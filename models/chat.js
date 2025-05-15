@@ -6,12 +6,12 @@ const createMessage = async (senderId, receiverId, groupID, content) => {
     return result.rows[0]
 }
 
-const markAsRead = async (messageId, userId) => {
+const markMessageAsRead = async (messageId, userId) => {
     const query =`INSERT INTO messages_read (message_id, user_id) 
-    VALUES ($1, $2) DO CONFLICT (message_id, user_id) DO UPDATE SET read_at = CURRENT_TIMESTAMP`
+    VALUES ($1, $2) ON CONFLICT (message_id, user_id) DO UPDATE SET read_at = CURRENT_TIMESTAMP`
     await pool.query(query, [messageId, userId])
 }
 
 
 
-module.exports = {createMessage,}
+module.exports = {createMessage, markMessageAsRead}
