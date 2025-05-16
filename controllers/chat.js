@@ -1,4 +1,4 @@
-const {createMessage, markMessageAsRead} = require("../models/chat")
+const {createMessage, markMessageAsRead, getMessagesId, readStatus} = require("../models/chat")
 
 const sendMessage = async (req, res) => {
     const {receiverId, groupId, content} = req.body
@@ -9,7 +9,7 @@ const sendMessage = async (req, res) => {
 
         res.status(201).json({
             message: "Message sent successfully",
-            message,
+            data: message,
         })
 
 
@@ -33,4 +33,36 @@ const markAsRead = async (req, res) => {
     }
 }
 
-module.exports = {sendMessage, markAsRead}
+const getMessages = async (req, res) => {
+    const {receiverId, groupId} = req.query
+    const senderId = req.user.id
+
+    try {
+        const messages = await getMessagesId(senderId, receiverId, groupId)
+        res.status(200).json({
+            messages: "Succesfully get Messages",
+            data: messages
+        })
+    }
+     catch(err){
+        console.log(err)
+        return res.status(500).json({message: "An error occurred on the server"})
+    }
+}
+
+const getReadStatus = async (req, res) => {
+    const {messageId} = req.params
+
+    try {
+        const message = await readStatus(messageId)
+        res.status(200).json({
+            message: "Succesfully get read message",
+            data: message
+        })
+    } catch(err){
+        console.log(err)
+        return res.status(500).json({message: "An error occurred on the server"})
+    }
+}
+
+module.exports = {sendMessage, markAsRead, getMessages, getReadStatus}
