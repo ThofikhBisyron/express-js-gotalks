@@ -1,29 +1,28 @@
-const { createUser, getUserByEmail, createOtp, verifyUser, getOtpByUserId, deleteOtpByUserId, updateUserNameById } = require('../models/user');
+const { createUser, getUserByEmail, createOtp, verifyUser, getOtpByUserId, deleteOtpByUserId, updateUserNameById, getUserById } = require('../models/user');
 const { generateToken } = require('../services/jwtService');
 const { sendOtpEmail } = require('../services/emailService');
 
 const registerOrLogin = async (req, res) => {
-  console.log(req.body)
   const { email, phone_number } = req.body;
 
   try {
-    let user = await getUserByEmail(email);
+    let user = await getUserByEmail(email)
 
     if (!user) {
-      user = await createUser(email, phone_number);
+      user = await createUser(email, phone_number)
     }
 
-    const token = generateToken(user.id);
+
     const otp = Math.floor(1000 + Math.random() * 9000).toString()
     await createOtp(user.id, otp)
     await sendOtpEmail(email, otp)
 
     res.status(200).json({
       message: 'Login Succesfully and Otp Was Send To Your Email',
-      token,
       user: {
         id: user.id,
-        email: user.email
+        email: user.email,
+        phoneNumber: user.phone_number,
       }
     });
 
@@ -35,18 +34,17 @@ const registerOrLogin = async (req, res) => {
 
 
 const verifyOtp = async (req, res) => {
-  const {id} = req.user
-  const {otp} = req.body
+  const {otp, userId} = req.body
 
   try {
-    const otpRecord = await getOtpByUserId(id)
+    const otpRecord = await getOtpByUserId(userId)
     if (!otpRecord) {
       return res.status(404).json({message: "OTP not found or already used"})
     }
 
     const isExpired = new Date() > otpRecord.expired_at
     if (isExpired) {
-      await deleteOtpByUserId(id)
+      await deleteOtpByUserId(userId)
       return res.status(400).json({message: "OTP has expired"})
     }
 
@@ -54,10 +52,20 @@ const verifyOtp = async (req, res) => {
       return res.status(400).json({message: "Invalid OTP"})
     }
 
-    await verifyUser(id)
-    await deleteOtpByUserId(id)
+    await verifyUser(userId)
+    await deleteOtpByUserId(userId)
 
-    res.status(200).json({message: "OTP successfully verified, account verified"})
+    const token = generateToken(userId);
+    let user = await getUserById(userId)
+    console.log(user)
+    res.status(200).json({
+      message: "OTP successfully verified, account verified",
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+      }
+    })
 
   } catch (err) {
     console.error(err.message);

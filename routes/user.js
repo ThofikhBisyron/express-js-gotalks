@@ -5,7 +5,7 @@ const { authenticateToken, requireVerifiedUser } = require('../middlewares/authM
 const router = express.Router();
 
 router.post('/register', registerOrLogin);
-router.post('/verify-otp',authenticateToken, verifyOtp)
+router.post('/verify-otp', verifyOtp)
 router.post('/update-username', authenticateToken, requireVerifiedUser, updateUsername)
 
 module.exports = router;

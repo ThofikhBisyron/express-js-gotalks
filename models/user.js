@@ -23,6 +23,11 @@ const getOtpByUserId = async (userId) => {
   return result.rows[0] 
 }
 
+const getUserById = async (userId) => {
+  const result = await pool.query(`SELECT * FROM users WHERE id = $1`, [userId])
+  return result.rows[0]
+};
+
 const verifyUser = async (userId) => {
   await pool.query(`UPDATE users SET is_verified = TRUE WHERE id = $1`, [userId])
 }
@@ -37,4 +42,4 @@ const updateUserNameById = async (userId, username) => {
 }
 
 
-module.exports = { createUser, getUserByEmail, createOtp, getOtpByUserId, deleteOtpByUserId, verifyUser, updateUserNameById };
+module.exports = { createUser, getUserByEmail, createOtp, getOtpByUserId, deleteOtpByUserId, verifyUser, updateUserNameById, getUserById };
