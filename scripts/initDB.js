@@ -62,6 +62,15 @@ CREATE TABLE IF NOT EXISTS contacts (
   UNIQUE (user_id, contact_id)
 );
 
+CREATE TABLE IF NOT EXISTS chat_list (
+  id SERIAL PRIMARY KEY,
+  user_id INT REFERENCES users(id) ON DELETE CASCADE,
+  target_id INT NOT NULL,
+  type VARCHAR(10) CHECK (type IN ('user', 'group')) NOT NULL,
+  last_message_id INT REFERENCES messages(id) ON DELETE SET NULL,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE (user_id, target_id, type)
+);
 `;
 
 const insertData = `
