@@ -1,6 +1,7 @@
 const pool = require('../config/db');
 
 const downQuery = `
+DROP TABLE IF EXISTS chat_list
 DROP TABLE IF EXISTS messages;
 DROP TABLE IF EXISTS group_members;
 DROP TABLE IF EXISTS contacts;
