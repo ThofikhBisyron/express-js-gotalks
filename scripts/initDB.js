@@ -69,6 +69,7 @@ CREATE TABLE IF NOT EXISTS chat_list (
   type VARCHAR(10) CHECK (type IN ('user', 'group')) NOT NULL,
   last_message_id INT REFERENCES messages(id) ON DELETE SET NULL,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  unread_count INT DEFAULT 0,
   UNIQUE (user_id, target_id, type)
 );
 `;
