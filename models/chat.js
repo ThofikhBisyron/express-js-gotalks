@@ -1,31 +1,25 @@
 const pool = require("../config/db")
 
-const createMessage = async (senderId, receiverId, groupID, content) => {
+const createMessage = async (senderId, receiverId, groupId, content) => {
     const query = `INSERT INTO messages (sender_id, receiver_id, group_id, content) VALUES ($1, $2, $3, $4) RETURNING *`
-    const result = await pool.query(query, [senderId, receiverId, groupID, content])
+    const result = await pool.query(query, [senderId, receiverId, groupId, content])
     const message = result.rows[0]
 
-    if (groupID) {
-        await pool.query(
-            `INSERT INTO chat_list (user_id, target_id, type, last_message_id, updated_at)
-            VALUES($1, $2, 'group', $3, NOW())
-            ON CONFLICT (user_id, target_id, 'type')
-            DO UPDATE SET last_message_id = $3, updated_at = NOW()`, [senderId, groupID, message.id]
-        )
-    } else {
-        await pool.query(
-            `INSERT INTO chat_list (user_id, target_id, type, last_message_id, updated_at)
-            VALUES ($1, $2, 'user', $3, NOW())
-            ON CONFLICT (user_id, target_id, type)
-            DO UPDATE SET last_message_id = $3, updated_at = NOW()`, [senderId, receiverId, message.id]
+    if (groupId) {
+        await updateChatList(senderId, groupId, 'group', message.id, false)
+
+         const members = await pool.query(
+            `SELECT user_id FROM group_members WHERE group_id = $1 AND user_id != $2`,
+            [groupId, senderId]
         )
 
-        await pool.query(
-            `INSERT INTO chat_list (user_id, target_id, type, last_message_id, updated_at)
-            VALUES $1, $2, 'user', $3, NOW()
-            ON CONFLICT (user_id, target_id, type)
-            DO UPDATE SET last_message_id = $3, updated_at = NOW()`, [receiverId, senderId, message.id]
-        )
+        for (const member of members.rows) {
+            await updateChatList(member.user_id, groupId, 'group', message.id, true)
+        }
+
+    } else {
+        await updateChatList(senderId, receiverId, 'user', message.id, false)
+        await updateChatList(receiverId, senderId, 'user', message.id, true)
     }
     return message
 }
@@ -54,6 +48,17 @@ const readStatus = async (messageId) => {
     JOIN users On users.id = messages_read.user_id WHERE messages_read.message_id = $1`
     const result = await pool.query(query, [messageId])
     return result.rows[0]
+}
+
+const updateChatList = async (userId, targetId, type, messageId, incrementUnread = false) => {
+    const updatePart = incrementUnread ? 'unread_count = chat_list.unread_count + 1' : 'unread_count = 0'
+    
+    await pool.query(
+        `INSERT INTO chat_list (user_id, target_id, type, last_message_id, updated_at, unread_count)
+        VALUES ($1, $2, $3, $4, NOW(), 1)
+        ON CONFLICT (user_id, target_id, type)
+        DO UPDATE SET last_message_id = $4, updated_at = NOW(), ${updatePart}`,[userId, targetId, type, messageId]
+    )
 }
 
 
