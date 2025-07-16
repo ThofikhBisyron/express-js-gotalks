@@ -6,6 +6,6 @@ const router = express.Router();
 
 router.post('/register', registerOrLogin);
 router.post('/verify-otp', verifyOtp)
-router.post('/update-username', authenticateToken, requireVerifiedUser, updateUsername)
+router.patch('/update-username', authenticateToken, requireVerifiedUser, updateUsername)
 
 module.exports = router;
