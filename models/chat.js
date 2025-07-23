@@ -61,5 +61,26 @@ const updateChatList = async (userId, targetId, type, messageId, incrementUnread
     )
 }
 
+const getChatList = async (userId) => {
+    const query = `SELECT 
+        cl.id,
+        cl.type,
+        cl.target_id,
+        cl.unread_count,
+        u.username AS target_name,
+        g.name AS group_name,
+        u.image,
+        g.image AS group_image,
+        m.content AS last_message,
+        m.created_at AS last_time
+        FROM chat_list cl
+        LEFT JOIN users u ON cl.type = 'user' AND cl.target_id = u.id
+        LEFT JOIN groups g ON cl.type = 'group' AND cl.target_id = g.id
+        LEFT JOIN messages m ON cl.last_message_id = m.id
+        WHERE cl.user_id = $1
+        ORDER BY m.created_at DESC;`
+    const result = await pool.query(query, [userId])
+    return result.rows
+}
 
-module.exports = {createMessage, markMessageAsRead, getMessagesId, readStatus}
+module.exports = {createMessage, markMessageAsRead, getMessagesId, readStatus, getChatList}
