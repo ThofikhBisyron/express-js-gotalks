@@ -24,7 +24,7 @@ const getOtpByUserId = async (userId) => {
 }
 
 const getUserById = async (userId) => {
-  const result = await pool.query(`SELECT * FROM users WHERE id = $1`, [userId])
+  const result = await pool.query(`SELECT id, username, phone_number, email, image, image_background, description FROM users WHERE id = $1`, [userId])
   return result.rows[0]
 };
 
@@ -35,9 +35,15 @@ const deleteOtpByUserId = async (userId) => {
   await pool.query(`DELETE FROM user_otp WHERE user_id = $1`, [userId])
 }
 
-const updateUserNameById = async (userId, username) => {
-  const query = `UPDATE users SET username = $1 WHERE id = $2 RETURNING *`
+const updateUserNameById = async (username, userId) => {
+  const query = `UPDATE users SET username = $1 WHERE id = $2 RETURNING username`
   const result = await pool.query(query, [username, userId])
+  return result.rows[0]
+}
+
+const updateImageUser = async (Image, userId) => {
+  const query = `UPDATE users SET image = $1 WHERE id = $2 RETURNING image`
+  const result = await pool.query(query, [Image, userId])
   return result.rows[0]
 }
 
