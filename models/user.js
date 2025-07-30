@@ -47,5 +47,19 @@ const updateImageUser = async (Image, userId) => {
   return result.rows[0]
 }
 
+const updateImgBgUser = async (imgBg, userId) => {
+  const query = `UPDATE users SET image_background = $1 WHERE id = $2 RETURNING image_background`
+  const result = await pool.query(query, [imgBg, userId])
+  return result.rows[0]
+}
 
-module.exports = { createUser, getUserByEmail, createOtp, getOtpByUserId, deleteOtpByUserId, verifyUser, updateUserNameById, getUserById };
+module.exports = { createUser, 
+  getUserByEmail, 
+  createOtp, 
+  getOtpByUserId, 
+  deleteOtpByUserId, 
+  verifyUser, 
+  updateUserNameById, 
+  getUserById, 
+  updateImageUser,
+  updateImgBgUser, };
