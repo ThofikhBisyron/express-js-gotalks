@@ -1,4 +1,4 @@
-const {createMessage, markMessageAsRead, getMessagesId, readStatus} = require("../models/chat")
+const {createMessage, markMessageAsRead, getMessagesId, readStatus, getChatList} = require("../models/chat")
 
 const sendMessage = async (req, res) => {
     const {receiverId, groupId, content} = req.body
@@ -65,4 +65,41 @@ const getReadStatus = async (req, res) => {
     }
 }
 
-module.exports = {sendMessage, markAsRead, getMessages, getReadStatus}
+const getChatListbyId = async (req, res) => {
+    const {id} = req.user
+
+    try{
+        const chatList = await getChatList(id)
+
+        const urlImage = `${process.env.BASE_URL}/uploads/profile/`
+        const urlImageGroup = `${process.env.BASE_URL}/uploads/groups/` 
+
+        const formatChatList = chatList.map(chat => {
+            let image = null
+            let group_image = chat.group_image
+
+
+            if (chat.type === 'user') {
+                image = chat.image ? urlImage + chat.image : null
+            } else if (chat.type === 'group') {
+                group_image = chat.group_image ? urlImageGroup + chat.group_image : null
+            }
+
+            return {
+                ...chat,
+                image,
+                group_image
+            }
+        })
+
+        res.status(200).json({
+            message: "Succesfully get chat list",
+            data: formatChatList
+        })
+    } catch(err){
+        console.log(err)
+        return res.status(500).json({message: "An error occurred on the server"})
+    }
+}
+
+module.exports = {sendMessage, markAsRead, getMessages, getReadStatus, getChatListbyId}
