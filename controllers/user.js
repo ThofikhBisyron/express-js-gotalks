@@ -1,6 +1,19 @@
-const { createUser, getUserByEmail, createOtp, verifyUser, getOtpByUserId, deleteOtpByUserId, updateUserNameById, getUserById } = require('../models/user');
+const { createUser, 
+  getUserByEmail, 
+  createOtp, 
+  verifyUser, 
+  getOtpByUserId, 
+  deleteOtpByUserId, 
+  updateUserNameById, 
+  getUserById, 
+  updateImageUser,
+  updateImgBgUser,
+  } = require('../models/user');
+
 const { generateToken } = require('../services/jwtService');
 const { sendOtpEmail } = require('../services/emailService');
+const fs = require("fs")
+const path = require("path")
 
 const registerOrLogin = async (req, res) => {
   const { email, phone_number } = req.body;
@@ -82,7 +95,7 @@ const updateUsername = async (req, res) => {
       return res.status(400).json({message: "Username cannot be empty"})
     }
 
-    const updatedUser = await updateUserNameById(id, username)
+    const updatedUser = await updateUserNameById(username, id)
     return res.status(200).json({
       message: "Username updated successfully",
       user: updatedUser,
@@ -95,4 +108,92 @@ const updateUsername = async (req, res) => {
   }
 
 }
-module.exports = { registerOrLogin, verifyOtp, updateUsername };
+
+const getUser = async (req, res) => {
+  const {id} = req.user
+
+  try{
+    if (!id){
+      return res.status(400).json({message: "User does not exist"})
+    }
+
+    const userProfile = await getUserById(id)
+    return res.status(200).json({
+      message: "Successfully Get user info",
+      user: userProfile
+    })
+  }catch (err) {
+    console.log(err)
+    return res.status(500).json({message: "An error occurred on the server"})
+  }
+}
+
+const updatedImageUser = async (req, res) => {
+  const userId = req.user.id
+  const image = req.file
+
+  try{
+    if (!image){
+      return res.status(400).json({message: "No Image Uploaded"})
+    }
+
+    const olduser = await getUserById(userId)
+    if (olduser.image){
+      const oldPath = path.join("uploads/profile", olduser.image)
+      if (fs.existsSync(oldPath)) {
+        fs.unlinkSync(oldPath)
+      }
+    }
+
+    const updateImgUser = await updateImageUser(image.filename, userId)
+    const imageUrl = image ? `${process.env.BASE_URL}/uploads/profile/${updateImgUser.image}` : null;
+
+    res.status(200).json({
+      message: "Profile image updated successfully",
+      data : {  
+        ...updateImgUser,
+        imageUrl : imageUrl
+      }
+    })
+  }catch(err) {
+    console.log(err)
+    return res.status(500).json({message: "An error occurred on the server"})
+  }
+}
+
+const updatedImgBgUser = async (req, res) => {
+  const userId = req.user.id
+  const imgBg = req.file
+
+  try{
+    if (!imgBg) {
+      return res.status(400).json({message: "No Image Uploaded"})
+    }
+
+    const oldImg = await getUserById(userId)
+
+    if (oldImg.image_background){
+      const oldPath = path.join("uploads/profile_background", oldImg.image_background)
+      if (fs.existsSync(oldPath)){
+        fs.unlinkSync(oldPath)
+      }
+    }
+
+    const updateImgBg = await updateImgBgUser(imgBg.filename, userId)
+    const imageUrl = imgBg ? `${process.env.BASE_URL}/uploads/profile_background/${updateImgBg.image_background}` : null;
+
+    res.status(200).json({
+      message: "Background image updated successfully",
+      data : {
+        ...updateImgBg,
+        imageUrl : imageUrl
+      }
+    })
+
+  }catch(err){
+    console.log(err)
+    return res.status(500).json({message: "An error occurred on the server"})
+  }
+}
+
+module.exports = { registerOrLogin, verifyOtp, updateUsername, getUser, updatedImageUser, updatedImgBgUser };
