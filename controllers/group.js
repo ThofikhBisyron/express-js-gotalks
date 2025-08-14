@@ -7,7 +7,7 @@ const addCreateGroup = async (req, res) => {
     if (typeof userIds === "string") {
         userIds = [userIds];
     }
-    const image = req.file ? `uploads/groups/${req.file.filename}` : null
+    const image = req.file ? req.file.filename : null
 
     try{
 
@@ -24,10 +24,16 @@ const addCreateGroup = async (req, res) => {
                 }
             }
         }
+        const imageUrl = image ? `${process.env.BASE_URL}/uploads/groups/${image}` : null;
 
         res.status(200).json({
             message: "Group created succesfully",
-            data: groupId,
+            data: {
+                id: groupId,
+                name,
+                description,
+                image: imageUrl,
+            }
         })
     } catch (err) {
         console.log(err.message)
