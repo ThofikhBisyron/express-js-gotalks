@@ -10,9 +10,16 @@ const createUploader = (whereFolder) => {
       cb(null, folder);
     },
     filename: function (req, file, cb) {
-      const uniqueName = Date.now() + "-" + file.originalname;
+      const ext = path.extname(file.originalname);
+      const base = path.basename(file.originalname, ext);
+
+      const safeBase = base
+      .replace(/[^a-zA-Z0-9]/g, "-") 
+      .toLowerCase();
+
+      const uniqueName = `${Date.now()}-${safeBase}${ext}`;
       cb(null, uniqueName);
-    },
+      },
   });
 
   return multer({
@@ -24,7 +31,7 @@ const createUploader = (whereFolder) => {
         return cb(new Error("Only image files are allowed"));
       }
       cb(null, true);
-    },
+    }, 
   });
 };
 
