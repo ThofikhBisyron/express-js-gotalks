@@ -23,4 +23,17 @@ const requireVerifiedUser = async (req, res, next) => {
   next()
 };
 
-module.exports = {authenticateToken, requireVerifiedUser};
+const authenticateSocket = (socket, next) => {
+  try {
+    const token = socket.handshake.auth?.token || socket.handshake.query?.token
+    if (!token) return next(new Error('Access token required'))
+
+    const user = jwt.verify(token, process.env.JWT_SECRET)
+    socket.user = user
+    next();
+  } catch (err) {
+    console.log('Socket auth failed:', err.message)
+    next(new Error('Invalid token'))
+  }
+};
+module.exports = {authenticateToken, requireVerifiedUser, authenticateSocket};
