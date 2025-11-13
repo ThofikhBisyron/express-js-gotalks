@@ -7,6 +7,7 @@ function chatSocket(io) {
     io.on('connection', (socket) =>{
         const userId = socket.user.id
         console.log(`User ${userId} connected`)
+        socket.emit('authenticated', { message: 'User authenticated successfully', userId })
 
         socket.join(`user_${userId}`)
 
@@ -26,10 +27,15 @@ function chatSocket(io) {
                 
                 socket.emit('message_sent', message)
 
-                if (groupId) {
-                    io.to(`group_${groupId}`).emit(`new_message`, message)
-                } else {
-                    io.to(`user_${receiverId}`).emit(`new_message`, message)
+                 if (groupId) {
+                    io.to(`group_${groupId}`).emit('new_message', message)
+                    } else {
+                    if (receiverId === userId) {
+                        io.to(`user_${userId}`).emit('new_message', message)
+                    } else {
+                        io.to(`user_${receiverId}`).emit('new_message', message)
+                        io.to(`user_${userId}`).emit('new_message', message)
+                    }
                 }
 
             }catch(err){
@@ -45,6 +51,7 @@ function chatSocket(io) {
         })
 
         socket.on(`get_chat_list`, async () => {
+            console.log('User', userId, 'requested chat list')
             const chatList = await getChatList(userId)
             socket.emit(`chat_list`, chatList)
         })
