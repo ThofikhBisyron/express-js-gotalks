@@ -8,6 +8,7 @@ const { createUser,
   getUserById, 
   updateImageUser,
   updateImgBgUser,
+  updateDescription,
   } = require('../models/user');
 
 const { generateToken } = require('../services/jwtService');
@@ -19,10 +20,24 @@ const registerOrLogin = async (req, res) => {
   const { email, phone_number } = req.body;
 
   try {
+    if (!email || !phone_number) {
+      return res.status(400).json({ message: "email and telephone number have not been filled in"});
+    }
+
+     let cleanPhone = phone_number.replace(/\D/g, '');
+
+    if (cleanPhone.startsWith('0')) {
+      cleanPhone = '62' + cleanPhone.slice(1);
+    }
+
+    if (!cleanPhone.startsWith('62')) {
+      cleanPhone = '62' + cleanPhone;
+    }
+
     let user = await getUserByEmail(email)
 
     if (!user) {
-      user = await createUser(email, phone_number)
+      user = await createUser(email, cleanPhone)
     }
 
 
@@ -196,4 +211,28 @@ const updatedImgBgUser = async (req, res) => {
   }
 }
 
-module.exports = { registerOrLogin, verifyOtp, updateUsername, getUser, updatedImageUser, updatedImgBgUser };
+const updatedDescription = async (req, res) => {
+  const userId = req.user.id
+  const { description } = req.body
+
+  try{
+
+      if (description.length > 300) {
+      return res.status(400).json({ 
+        message: "Description cannot exceed 300 characters" 
+      });
+    }
+
+    const updateDesc = await updateDescription(description, userId)
+    return res.status(200).json({
+      message : "Description updated successfully",
+      data : updateDesc,
+    })
+
+  }catch(err){
+    console.log(err)
+    return res.status(500).json({message: "An error occurred on the server"})
+  }
+}
+
+module.exports = { registerOrLogin, verifyOtp, updateUsername, getUser, updatedImageUser, updatedImgBgUser, updatedDescription };

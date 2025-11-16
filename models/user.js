@@ -53,6 +53,22 @@ const updateImgBgUser = async (imgBg, userId) => {
   return result.rows[0]
 }
 
+// const updateProfle = async (image, imgBg, description, userId) => {
+//   const query = `UPDATE users 
+//   SET image = $1, 
+//   image_background = $2, 
+//   description =3, 
+//   WHERE id =$4 RETURNING *`
+//   const result = await pool.query(query, [image, imgBg, description, userId])
+//   return result.rows[0]
+// }
+
+const updateDescription = async (description, userId) =>{
+  const query = `UPDATE users SET description = $1 WHERE id = $2 RETURNING description`
+  const result = await pool.query(query, [description, userId])
+  return result.rows[0]
+}
+
 module.exports = { createUser, 
   getUserByEmail, 
   createOtp, 
@@ -62,4 +78,6 @@ module.exports = { createUser,
   updateUserNameById, 
   getUserById, 
   updateImageUser,
-  updateImgBgUser, };
+  updateImgBgUser,
+  updateDescription, 
+  };

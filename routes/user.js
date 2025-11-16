@@ -1,5 +1,5 @@
 const express = require('express');
-const { registerOrLogin, verifyOtp, updateUsername, getUser, updatedImageUser, updatedImgBgUser } = require('../controllers/user');
+const { registerOrLogin, verifyOtp, updateUsername, getUser, updatedImageUser, updatedImgBgUser, updatedDescription } = require('../controllers/user');
 const { authenticateToken, requireVerifiedUser } = require('../middlewares/authMiddleware')
 const createUploader = require('../middlewares/upload')
 const updatedProfileImage = createUploader("profile")
@@ -12,5 +12,6 @@ router.patch('/update-username', authenticateToken, requireVerifiedUser, updateU
 router.get('/profile', authenticateToken, requireVerifiedUser, getUser)
 router.patch('/profileimage', authenticateToken, requireVerifiedUser, updatedProfileImage.single("image"), updatedImageUser)
 router.patch('/bgprofile', authenticateToken, requireVerifiedUser, updatedBgProfile.single("imgBg"), updatedImgBgUser)
+router.patch(`/desc`, authenticateToken, requireVerifiedUser, updatedDescription)
 
 module.exports = router;
