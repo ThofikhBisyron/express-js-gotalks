@@ -18,8 +18,12 @@ const createMessage = async (senderId, receiverId, groupId, content) => {
         }
 
     } else {
-        await updateChatList(senderId, receiverId, 'user', message.id, false)
-        await updateChatList(receiverId, senderId, 'user', message.id, true)
+         if (senderId === receiverId) {
+        await updateChatList(senderId, receiverId, 'user', message.id, false);
+        } else {
+        await updateChatList(senderId, receiverId, 'user', message.id, false);
+        await updateChatList(receiverId, senderId, 'user', message.id, true);
+        }
     }
     return message
 }
@@ -37,7 +41,7 @@ const getMessagesId = async (senderId, receiverId, groupId) => {
         result = await pool.query(query, [groupId])
         return result.rows
     } else {
-        query =`SELECT * FROM messages WHERE (sender_id = $1 AND receiver_id = $2) OR (sender_id = $2 AND receiver_id = $2)`
+        query =`SELECT * FROM messages WHERE (sender_id = $1 AND receiver_id = $2) OR (sender_id = $2 AND receiver_id = $1)`
         result = await pool.query(query, [senderId, receiverId])
         return result.rows
     }

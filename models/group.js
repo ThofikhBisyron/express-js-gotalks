@@ -56,4 +56,24 @@ const countGroupMember = async (groupId) => {
     return parseInt(result.rows[0].count)
 }
 
-module.exports = { createGroup, createGroupMember, isGroupAdmin, isGroupMember, deleteGroupById, removeUserFromGroup, countGroupMember }
+const getGroupByUserId = async (userId) => {
+    const query = `SELECT 
+    id,
+    name,
+    image
+    FROM groups
+    WHERE
+    created_by = $1
+    `
+    const result = await pool.query(query, [userId])
+    return result.rows
+}
+
+module.exports = { createGroup, 
+    createGroupMember, 
+    isGroupAdmin, 
+    isGroupMember, 
+    deleteGroupById, 
+    removeUserFromGroup, 
+    countGroupMember, 
+    getGroupByUserId }

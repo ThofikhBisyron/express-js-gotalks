@@ -1,4 +1,10 @@
-const {createGroup, createGroupMember, isGroupAdmin, isGroupMember, deleteGroupById, removeUserFromGroup, countGroupMember} = require("../models/group")
+const {createGroup, 
+    createGroupMember, 
+    isGroupAdmin, isGroupMember, 
+    deleteGroupById, 
+    removeUserFromGroup, 
+    countGroupMember,
+    getGroupByUserId} = require("../models/group")
 
 const addCreateGroup = async (req, res) => {
     const userId = req.user.id
@@ -116,4 +122,25 @@ const leaveGroup = async (req, res) => {
     }
 }
 
-module.exports ={addCreateGroup, addMemberGroup, deleteGroup, leaveGroup}
+const getGroup = async (req, res) => {
+    const userId = req.user.id
+
+    try{
+        const group = await getGroupByUserId(userId)
+
+        if (group.length === 0) {
+            return res.status(200).json({ message : "no groups have been created"})
+        }
+
+        res.status(200).json({
+            message : "Group list successfully retrieved",
+            data : group,
+        })
+
+    }catch(err){
+        console.log(err)
+        return res.status(500).json({message: "An error occurred on the server"})
+    }
+}
+
+module.exports ={addCreateGroup, addMemberGroup, deleteGroup, leaveGroup, getGroup}
