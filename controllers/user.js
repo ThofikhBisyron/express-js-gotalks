@@ -217,7 +217,7 @@ const updatedDescription = async (req, res) => {
 
   try{
 
-      if (description.length > 300) {
+      if (description.length > 22) {
       return res.status(400).json({ 
         message: "Description cannot exceed 300 characters" 
       });

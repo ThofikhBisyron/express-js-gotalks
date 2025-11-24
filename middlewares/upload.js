@@ -27,7 +27,7 @@ const createUploader = (whereFolder) => {
     limits: { fileSize: 2 * 1024 * 1024 }, 
     fileFilter: function (req, file, cb) {
       const ext = path.extname(file.originalname);
-      if (![".jpg", ".jpeg", ".png"].includes(ext.toLowerCase())) {
+      if (![".jpg", ".jpeg", ".png", ".heic"].includes(ext.toLowerCase())) {
         return cb(new Error("Only image files are allowed"));
       }
       cb(null, true);
@@ -35,4 +35,16 @@ const createUploader = (whereFolder) => {
   });
 };
 
-module.exports = createUploader;
+const multerErrorHandler = (err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+
+    return res.status(400).json({ error: err.message });
+  } else if (err) {
+
+    return res.status(400).json({ error: err.message });
+  }
+  next();
+};
+
+
+module.exports = {createUploader, multerErrorHandler};
