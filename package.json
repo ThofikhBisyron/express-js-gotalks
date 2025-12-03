@@ -17,7 +17,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "migrate:reset": "node scripts/dropDB.js && node scripts/initDB.js"
+    "migrate:reset": "node scripts/createDB.js && node scripts/dropDB.js && node scripts/initDB.js"
   },
   "repository": {
     "type": "git",
