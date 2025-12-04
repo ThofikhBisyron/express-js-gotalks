@@ -7,13 +7,14 @@ RUN npm ci --only=production
 
 COPY . .
 
-# ===== STAGE FINAL (DISTROLESS) =====
-FROM gcr.io/distroless/nodejs18
+FROM node:18-alpine
 
 WORKDIR /app
 
-COPY --from=builder /app .
+COPY --from=builder /app ./
+
+RUN apk add --no-cache ca-certificates
 
 EXPOSE 3000
 
-CMD ["server.js"]
+CMD ["node", "server.js"]
