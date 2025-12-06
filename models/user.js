@@ -69,6 +69,12 @@ const updateDescription = async (description, userId) =>{
   return result.rows[0]
 }
 
+const createGoogleUser = async (email) => {
+  const result = await pool.query(
+    `INSERT INTO users (email, is_verified) VALUES ($1, $2) RETURNING *`,[email, true])
+  return result.rows[0]
+}
+
 module.exports = { createUser, 
   getUserByEmail, 
   createOtp, 
@@ -80,4 +86,5 @@ module.exports = { createUser,
   updateImageUser,
   updateImgBgUser,
   updateDescription, 
+  createGoogleUser,
   };

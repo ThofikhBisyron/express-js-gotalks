@@ -4,7 +4,7 @@ const upQuery = `
 CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
   username VARCHAR(100) NULL,
-  phone_number VARCHAR(15) NOT NULL,
+  phone_number VARCHAR(15) NULL,
   email VARCHAR(100) UNIQUE NOT NULL,
   image VARCHAR(255),
   image_background VARCHAR(255),

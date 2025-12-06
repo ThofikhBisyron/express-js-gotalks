@@ -9,12 +9,17 @@ const { createUser,
   updateImageUser,
   updateImgBgUser,
   updateDescription,
+  createGoogleUser,
   } = require('../models/user');
 
 const { generateToken } = require('../services/jwtService');
 const { sendOtpEmail } = require('../services/emailService');
+const { OAuth2Client } = require('google-auth-library');
 const fs = require("fs")
 const path = require("path")
+const jwt = require('jsonwebtoken');
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const registerOrLogin = async (req, res) => {
   const { email, phone_number } = req.body;
@@ -235,4 +240,50 @@ const updatedDescription = async (req, res) => {
   }
 }
 
-module.exports = { registerOrLogin, verifyOtp, updateUsername, getUser, updatedImageUser, updatedImgBgUser, updatedDescription };
+const loginWithGoogle = async (req, res) => {
+  const { idToken } = req.body;
+
+
+  try{
+    if (!idToken) {
+      return res.status(400).json({ message: "idToken required" });
+    }
+
+    const ticket = await client.verifyIdToken({
+      idToken,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+
+    const email = payload.email;
+
+    let user = await getUserByEmail(email);
+
+    if (!user) {
+      user = await createGoogleUser(email);
+    }
+
+    const token = jwt.sign(
+      {
+        id: user.id,
+        email: user.email
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    res.json({
+      message: "Google login success",
+      token,
+      user
+    });
+
+
+  }catch(err){
+    console.log(err)
+    return res.status(500).json({message: "An error occurred on the server"})
+  }
+}
+
+module.exports = { registerOrLogin, verifyOtp, updateUsername, getUser, updatedImageUser, updatedImgBgUser, updatedDescription, loginWithGoogle };
