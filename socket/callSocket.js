@@ -17,6 +17,11 @@ function callSocket(io) {
         // -------------------------
         socket.on("call-user", (data) => {
             const { receiverId, offer } = data;
+            const room = io.sockets.adapter.rooms.get(`user_${receiverId}`);
+            if (!room) {
+                return socket.emit("user-offline", { receiverId });
+            }
+
 
             console.log(`User ${userId} is calling user ${receiverId}`);
 
