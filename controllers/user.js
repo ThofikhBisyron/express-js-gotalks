@@ -270,7 +270,7 @@ const loginWithGoogle = async (req, res) => {
         email: user.email
       },
       process.env.JWT_SECRET,
-      { expiresIn: '7d' }
+      { expiresIn: undefined }
     );
 
     res.json({

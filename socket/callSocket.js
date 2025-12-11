@@ -28,6 +28,7 @@ function callSocket(io) {
             io.to(`user_${receiverId}`).emit("incoming-call", {
                 callerId: userId,
                 callerName: socket.user.name, 
+                callerEmail: socket.user.email,
                 callerImage: socket.user.image,
                 offer,
             });
@@ -68,6 +69,8 @@ function callSocket(io) {
 
             io.to(`user_${targetId}`).emit("call-ended", {
                 from: userId,
+                name: socket.user.name,
+                image: socket.user.image,
             });
         });
 
