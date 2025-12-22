@@ -1,5 +1,9 @@
 const { createMessage, getMessagesId, getChatList} = require("../models/chat")
+const { getPushTokensByUserId } = require("../models/expoPush")
+const { sendExpoPushNotification } = require("../services/expoService")
+const { getGroupMemberIds } = require("../models/group")
 const { authenticateSocket } = require("../middlewares/authMiddleware")
+
 
 function chatSocket(io) {
     io.use(authenticateSocket)
@@ -29,12 +33,49 @@ function chatSocket(io) {
 
                  if (groupId) {
                     io.to(`group_${groupId}`).emit('new_message', message)
+                    const memberIds = await getGroupMemberIds(groupId)
+
+                    const targetUserIds = memberIds.filter(id => id !== userId)
+
+                    let allTokens = []
+
+                    for (const uid of targetUserIds) {
+                        const tokens = await getPushTokensByUserId(uid)
+                        allTokens.push(...tokens)
+                    }
+
+                     if (allTokens.length) {
+                        try {
+                        await sendExpoPushNotification(
+                            allTokens,
+                            `${socket.user.name}`,
+                            content,
+                            { type: 'group_chat', groupId, senderId: userId }
+                        )
+                        } catch (e) {
+                        console.error('Group push failed:', e)
+                        }
+                    }
+
+    
                     } else {
                     if (receiverId === userId) {
                         io.to(`user_${userId}`).emit('new_message', message)
                     } else {
                         io.to(`user_${receiverId}`).emit('new_message', message)
                         io.to(`user_${userId}`).emit('new_message', message)
+
+                          const tokens = await getPushTokensByUserId(receiverId);
+
+                        await sendExpoPushNotification(
+                            tokens,
+                            socket.user.name,  
+                            content,                
+                            {
+                            type: "chat",
+                            senderId: userId,
+                            }
+                        );
                     }
                 }
 

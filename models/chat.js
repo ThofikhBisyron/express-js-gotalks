@@ -87,4 +87,5 @@ const getChatList = async (userId) => {
     return result.rows
 }
 
+
 module.exports = {createMessage, markMessageAsRead, getMessagesId, readStatus, getChatList}

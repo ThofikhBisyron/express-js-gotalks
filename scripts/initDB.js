@@ -72,6 +72,18 @@ CREATE TABLE IF NOT EXISTS chat_list (
   unread_count INT DEFAULT 0,
   UNIQUE (user_id, target_id, type)
 );
+
+CREATE TABLE IF NOT EXISTS user_push_tokens (
+  id SERIAL PRIMARY KEY,
+  user_id INT REFERENCES users(id) ON DELETE CASCADE,
+  expo_push_token TEXT NOT NULL UNIQUE,
+  device_type VARCHAR(20) NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE UNIQUE INDEX uniq_user_device
+ON user_push_tokens (user_id, device_type);
 `;
 
 const insertData = `

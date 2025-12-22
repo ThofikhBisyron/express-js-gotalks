@@ -69,6 +69,37 @@ const getGroupByUserId = async (userId) => {
     return result.rows
 }
 
+const getGroupMemberIds = async (groupId) => {
+  const res = await pool.query(
+    `SELECT user_id FROM group_members WHERE group_id = $1`,
+    [groupId]
+  )
+  return res.rows.map(r => r.user_id)
+}
+
+const getGroupDetail = async (groupId) => {
+  const group = await pool.query(
+    `SELECT id, name, image, description FROM groups WHERE id = $1`,
+    [groupId]
+  )
+
+  const members = await pool.query(
+    `
+    SELECT u.id, u.username, gm.role
+    FROM group_members gm
+    JOIN users u ON u.id = gm.user_id
+    WHERE gm.group_id = $1
+    `,
+    [groupId]
+  )
+
+  return {
+    group: group.rows[0],
+    members: members.rows
+  }
+}
+
+
 module.exports = { createGroup, 
     createGroupMember, 
     isGroupAdmin, 
@@ -76,4 +107,6 @@ module.exports = { createGroup,
     deleteGroupById, 
     removeUserFromGroup, 
     countGroupMember, 
-    getGroupByUserId }
+    getGroupByUserId,
+    getGroupMemberIds,
+    getGroupDetail }
