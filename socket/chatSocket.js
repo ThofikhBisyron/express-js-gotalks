@@ -1,9 +1,10 @@
-const { createMessage, getMessagesId, getChatList} = require("../models/chat")
-const { getPushTokensByUserId } = require("../models/expoPush")
-const { sendExpoPushNotification } = require("../services/expoService")
+const { createMessage, getMessagesId, getChatList, deleteChatListById} = require("../models/chat")
+// const { getPushTokensByUserId } = require("../models/expoPush")
+// const { sendExpoPushNotification } = require("../services/expoService")
 const { getGroupMemberIds } = require("../models/group")
 const { authenticateSocket } = require("../middlewares/authMiddleware")
-
+const { sendFCM } = require("../services/FCMService")
+const { getPushTokensByUserIdFCM } = require("../models/fcmPush");
 
 function chatSocket(io) {
     io.use(authenticateSocket)
@@ -40,18 +41,22 @@ function chatSocket(io) {
                     let allTokens = []
 
                     for (const uid of targetUserIds) {
-                        const tokens = await getPushTokensByUserId(uid)
+                        const tokens = await getPushTokensByUserIdFCM(uid)
                         allTokens.push(...tokens)
                     }
 
                      if (allTokens.length) {
                         try {
-                        await sendExpoPushNotification(
-                            allTokens,
-                            `${socket.user.name}`,
-                            content,
-                            { type: 'group_chat', groupId, senderId: userId }
-                        )
+                        await sendFCM(allTokens, {
+                            title: socket.user.name,
+                            body: content,
+                            channel: 'chat',
+                            data: {
+                                type: 'group_chat',
+                                groupId,
+                                senderId: userId,
+                            },
+                        });
                         } catch (e) {
                         console.error('Group push failed:', e)
                         }
@@ -65,17 +70,17 @@ function chatSocket(io) {
                         io.to(`user_${receiverId}`).emit('new_message', message)
                         io.to(`user_${userId}`).emit('new_message', message)
 
-                          const tokens = await getPushTokensByUserId(receiverId);
+                        const tokens = await getPushTokensByUserIdFCM(receiverId);
 
-                        await sendExpoPushNotification(
-                            tokens,
-                            socket.user.name,  
-                            content,                
-                            {
-                            type: "chat",
-                            senderId: userId,
-                            }
-                        );
+                        await sendFCM(tokens, {
+                            title: socket.user.name,
+                            body: content,
+                            channel: 'chat',
+                            data: {
+                                type: 'chat',
+                                senderId: userId,
+                            },
+                        });
                     }
                 }
 
@@ -95,6 +100,18 @@ function chatSocket(io) {
             console.log('User', userId, 'requested chat list')
             const chatList = await getChatList(userId)
             socket.emit(`chat_list`, chatList)
+        })
+
+        socket.on(`delete_chatlist`, async (data) => {
+            const {chatListId} = data
+            try{
+                await deleteChatListById(chatListId, userId)
+                const chatList = await getChatList(userId)
+                socket.emit(`chat_list`, chatList)
+            }catch(err){
+                console.error(err)
+                socket.emit("error_message", {message: "Failed to delete chat"})
+            }
         })
 
         socket.on(`disconnect`, () =>{
