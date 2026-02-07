@@ -1,6 +1,8 @@
 const pool = require('../config/db');
 
 const upQuery = `
+DROP INDEX IF EXISTS uniq_user_device;
+
 CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
   username VARCHAR(100) NULL,
@@ -102,8 +104,8 @@ ON user_push_tokens (user_id, device_type);
 const insertData = `
 INSERT INTO users (username, phone_number, email, is_verified)
 VALUES
-('raisya', '085870020195', 'syaifania.raisya@gmail.com', true),
-('syaifania', '0881082320769', 'raisya.syaifania@gmail.com', true);
+('raisya', '6285870020195', 'syaifania.raisya@gmail.com', true),
+('syaifania', '62881082320769', 'raisya.syaifania@gmail.com', true);
 
 
 `;
