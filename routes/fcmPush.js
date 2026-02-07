@@ -1,10 +1,10 @@
 const express = require('express')
 const router = express.Router();
 const {authenticateToken, requireVerifiedUser} = require("../middlewares/authMiddleware")
-const { registerPushToken } = require("../controllers/expoPush")
+const { registerPushTokenFCM } = require("../controllers/fcmPush")
 
 
-router.post("/push-token", authenticateToken, requireVerifiedUser, registerPushToken)
+router.post("/push-tokenFCM", authenticateToken, requireVerifiedUser, registerPushTokenFCM)
 
 
 module.exports = router

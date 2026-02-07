@@ -1,3 +1,4 @@
+const { group } = require("console")
 const pool = require("../config/db")
 const fs = require("fs")
 const path = require("path")
@@ -30,17 +31,23 @@ const isGroupMember = async (groupId, userId) => {
 
 const deleteGroupById = async (groupId) => {
     const group = await pool.query(`SELECT image from groups wHERE id = $1`, [groupId])
-    
-    if (group.rows.length === 0 ) return
 
-    const imagePath = group.rows[0].image 
+    if (group.rows.length === 0) return
 
-    if (imagePath) {
-        const fullPath = path.join(__dirname, "..", imagePath)
-        console.log(fullPath)
-        if (fs.existsSync(fullPath, )) {
-            fs.unlinkSync(fullPath)
-        }
+    const image = group.rows[0].image
+
+    if (image) {
+      const fullPath = path.join(
+        __dirname,
+        "..",
+        "uploads",
+        "groups",
+        image
+      )
+
+      if (fs.existsSync(fullPath)) {
+        fs.unlinkSync(fullPath)
+      }
     }
 
     await pool.query(`DELETE fROM groups where id = $1`, [groupId])
@@ -85,7 +92,7 @@ const getGroupDetail = async (groupId) => {
 
   const members = await pool.query(
     `
-    SELECT u.id, u.username, gm.role
+    SELECT u.id, u.username, u.image, gm.role
     FROM group_members gm
     JOIN users u ON u.id = gm.user_id
     WHERE gm.group_id = $1
@@ -99,6 +106,12 @@ const getGroupDetail = async (groupId) => {
   }
 }
 
+const updateGroup = async (name, Image, description, groupId) => {
+  const query = `UPDATE groups SET (name, image, description) = ($1, $2, $3) WHERE id = $4 RETURNING id, name, image, description`
+  const result = await pool.query(query,[name, Image, description, groupId])
+  return result.rows[0]
+}
+
 
 module.exports = { createGroup, 
     createGroupMember, 
@@ -109,4 +122,5 @@ module.exports = { createGroup,
     countGroupMember, 
     getGroupByUserId,
     getGroupMemberIds,
-    getGroupDetail }
+    getGroupDetail,
+    updateGroup, }

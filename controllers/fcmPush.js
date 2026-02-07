@@ -1,15 +1,15 @@
-const { savePushToken } = require("../models/expoPush");
+const { savePushTokenFCM } = require("../models/fcmPush");
 
-const registerPushToken = async (req, res) => {
+const registerPushTokenFCM = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { expoPushToken, deviceType } = req.body;
+    const { fcmPushToken, deviceType } = req.body;
 
-    if (!expoPushToken) {
+    if (!fcmPushToken) {
       return res.status(400).json({ message: "Push token required" });
     }
 
-    await savePushToken(userId, expoPushToken, deviceType);
+    await savePushTokenFCM(userId, fcmPushToken, deviceType);
 
     res.json({ message: "Push token saved" });
   } catch (err) {
@@ -19,4 +19,4 @@ const registerPushToken = async (req, res) => {
 };
 
 
-module.exports = { registerPushToken };
+module.exports = { registerPushTokenFCM };

@@ -3,6 +3,8 @@ async function sendExpoPushNotification(tokens, title, body, data = {}) {
   const messages = tokens.map(token => ({
     to: token,
     sound: "default",
+    priority: 'high',
+    channelId: 'chat',
     title,
     body,
     data,
@@ -18,6 +20,7 @@ async function sendExpoPushNotification(tokens, title, body, data = {}) {
   });
 
   const result = await response.json();
+  console.log(result)
   return result;
 }
 

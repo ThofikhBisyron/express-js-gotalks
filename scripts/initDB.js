@@ -82,9 +82,22 @@ CREATE TABLE IF NOT EXISTS user_push_tokens (
   updated_at TIMESTAMP DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS user_fcm_tokens (
+  id SERIAL PRIMARY KEY,
+  user_id INT REFERENCES users(id) ON DELETE CASCADE,
+  expo_fcm_token TEXT NOT NULL,
+  device_type VARCHAR(20) NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW(),
+  UNIQUE(user_id, device_type)
+);
+
 CREATE UNIQUE INDEX uniq_user_device
 ON user_push_tokens (user_id, device_type);
+
 `;
+
+
 
 const insertData = `
 INSERT INTO users (username, phone_number, email, is_verified)

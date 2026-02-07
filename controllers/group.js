@@ -4,7 +4,11 @@ const {createGroup,
     deleteGroupById, 
     removeUserFromGroup, 
     countGroupMember,
-    getGroupByUserId} = require("../models/group")
+    getGroupByUserId,
+    getGroupDetail,
+    updateGroup,} = require("../models/group")
+const fs = require("fs")
+const path = require("path")
 
 const addCreateGroup = async (req, res) => {
     const userId = req.user.id
@@ -143,4 +147,92 @@ const getGroup = async (req, res) => {
     }
 }
 
-module.exports ={addCreateGroup, addMemberGroup, deleteGroup, leaveGroup, getGroup}
+const getGroupDetails = async (req, res) => {
+    const userId = req.user.id
+    const {groupId} = req.params
+
+    try{
+        const isMember = await isGroupMember(groupId, userId)
+        if (!isMember) {
+            return res.status(403).json({ message: "You are not a member of this group" })
+        }
+
+        const data = await getGroupDetail(groupId)
+
+        if (!data.group) {
+            return res.status(404).json({ message: "Group Not Found"})
+        }
+
+        return res.status(200).json({
+            message: "Group detail retrieved successfully",
+            data
+        })
+    }catch(err){
+        console.log(err)
+        return res.status(500).json({message: "An error occurred on the server"})
+    }
+}
+
+const editGroup = async (req, res) => {
+    const userId = req.user.id
+    const { groupId } = req.params
+    const { name, description } = req.body
+    const newImage = req.file ? req.file.filename : null
+
+    try{
+        const isAdmin = await isGroupAdmin(groupId, userId)
+        if (!isAdmin) {
+        return res.status(403).json({ message: "Only admin can edit group" })
+        }
+
+        const data = await getGroupDetail(groupId)
+        if (!data.group) {
+        return res.status(404).json({ message: "Group not found" })
+        }
+
+        const oldImage = data.group.image
+
+        let finalImage = oldImage
+
+        if (newImage) {
+        if (oldImage) {
+            const oldImagePath = path.join(
+            __dirname,
+            "..",
+            "uploads/groups",
+            oldImage
+            )
+
+            if (fs.existsSync(oldImagePath)) {
+            fs.unlinkSync(oldImagePath)
+            }
+        }
+
+        finalImage = newImage
+        }
+
+        const updatedGroup = await updateGroup(
+        name,
+        finalImage,
+        description,
+        groupId
+        )
+
+        return res.status(200).json({
+        message: "Group updated successfully",
+        data: {
+            id: updatedGroup.id,
+            name: updatedGroup.name,
+            description: updatedGroup.description,
+            image: updatedGroup.image
+            ? `${process.env.BASE_URL}/uploads/groups/${updatedGroup.image}`
+            : null
+        }
+        })
+
+    }catch(err){
+        console.log(err)
+        return res.status(500).json({message: "An error occurred on the server"})
+    }
+}
+module.exports ={addCreateGroup, addMemberGroup, deleteGroup, leaveGroup, getGroup, getGroupDetails, editGroup}

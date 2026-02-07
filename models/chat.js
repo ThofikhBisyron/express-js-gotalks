@@ -87,5 +87,7 @@ const getChatList = async (userId) => {
     return result.rows
 }
 
-
-module.exports = {createMessage, markMessageAsRead, getMessagesId, readStatus, getChatList}
+const deleteChatListById = async (chatListId, userId) => {
+    await pool.query(`DELETE from chat_list Where id = $1 AND user_id = $2`, [chatListId, userId])
+}
+module.exports = {createMessage, markMessageAsRead, getMessagesId, readStatus, getChatList, deleteChatListById}

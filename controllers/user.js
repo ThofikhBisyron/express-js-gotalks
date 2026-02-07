@@ -240,6 +240,30 @@ const updatedDescription = async (req, res) => {
   }
 }
 
+const getProfileUserById = async (req, res) => {
+  const {userId} = req.params
+
+  try{
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required" })
+    }
+
+    const user = await getUserById(userId)
+
+    if (!user) {
+      return res.status(404).json({ message: "User Not Found" })
+    }
+
+    return res.status(200).json({
+      message: "Successfully get user profile",
+      data: user,
+    })
+  }catch(err){
+    console.log(err)
+    return res.status(500).json({message: "An error occurred on the server"})
+  }
+}
+
 const loginWithGoogle = async (req, res) => {
   const { idToken } = req.body;
 
@@ -270,7 +294,6 @@ const loginWithGoogle = async (req, res) => {
         email: user.email
       },
       process.env.JWT_SECRET,
-      { expiresIn: undefined }
     );
 
     res.json({
@@ -286,4 +309,12 @@ const loginWithGoogle = async (req, res) => {
   }
 }
 
-module.exports = { registerOrLogin, verifyOtp, updateUsername, getUser, updatedImageUser, updatedImgBgUser, updatedDescription, loginWithGoogle };
+module.exports = { registerOrLogin, 
+  verifyOtp, 
+  updateUsername, 
+  getUser, 
+  updatedImageUser, 
+  updatedImgBgUser, 
+  updatedDescription, 
+  loginWithGoogle, 
+  getProfileUserById};
